@@ -1,7 +1,7 @@
 ##################################################
-## Name:    Lab1_Template.s  					##
-## Purpose:	A Template for flashing LED 		##
-## Author:	Mahmoud A. Elmohr 					##
+## Name:    Lab1_Template.s                     ##
+## Purpose:	A Template for flashing LED         ##
+## Author:	Mahmoud A. Elmohr                   ##
 ##################################################
 
 # The main function must be initialized in that manner in order to compile properly on the board
@@ -12,7 +12,7 @@ main:
     addi s2, zero, 0xFF ## Stores the 8 least sig bits as 0xFF
     sw s2, 0(s1) ## store 0xFF into s2 least sig bits so that it turns on
     ## s3 is counter
-    ## TODO:: Re-adjust this value based on # of instructions in loop
+	## Comes from 25MHz divided by 4 beacuse .5 second on .5 second off and 2 instructions in main loop
     li s4, 0x5F5E10
     li s5, 0x55
 	
