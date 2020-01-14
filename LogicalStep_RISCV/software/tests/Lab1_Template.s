@@ -23,10 +23,9 @@ main:
     	sw s5, 0(s1)
         ## RESET COUNTER
         li s3, 0
-        j while_0
 
     while_0:
     	addi s3, s3, 1
         
         BNE s3, s4, while_0
-        BEQ s3, s4, TOGGLE
+        j TOGGLE
