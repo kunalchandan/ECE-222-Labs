@@ -1,0 +1,6 @@
+v1
+DSP_BALANCING_IMPLEMENTATION,DSP_BLOCKS,QD1:rv|orca:the_vectorblox_orca|orca_core:core|execute:X|arithmetic_unit:alu|lpm_mult:Mult0|mult_ugs:auto_generated|mac_out2,
+DSP_BALANCING_IMPLEMENTATION,DSP_BLOCKS,QD1:rv|orca:the_vectorblox_orca|orca_core:core|execute:X|arithmetic_unit:alu|lpm_mult:Mult0|mult_ugs:auto_generated|mac_out4,
+DSP_BALANCING_IMPLEMENTATION,DSP_BLOCKS,QD1:rv|orca:the_vectorblox_orca|orca_core:core|execute:X|arithmetic_unit:alu|lpm_mult:Mult0|mult_ugs:auto_generated|mac_out6,
+DSP_BALANCING_IMPLEMENTATION,DSP_BLOCKS,QD1:rv|orca:the_vectorblox_orca|orca_core:core|execute:X|arithmetic_unit:alu|lpm_mult:Mult0|mult_ugs:auto_generated|mac_out8,
+PORT_SWAPPING,PORT_SWAP_TYPE_DSPMULT,QD1:rv|orca:the_vectorblox_orca|orca_core:core|execute:X|arithmetic_unit:alu|lpm_mult:Mult0|mult_ugs:auto_generated|mac_mult5,
