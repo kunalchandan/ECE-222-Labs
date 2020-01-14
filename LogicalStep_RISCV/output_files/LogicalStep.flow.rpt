@@ -1,5 +1,5 @@
 Flow report for LogicalStep
-Tue Jan 14 14:36:05 2020
+Tue Jan 14 14:55:18 2020
 Quartus Prime Version 15.1.0 Build 185 10/21/2015 SJ Standard Edition
 
 
@@ -41,7 +41,7 @@ agreement for further details.
 +--------------------------------------------------------------------------------------+
 ; Flow Summary                                                                         ;
 +------------------------------------+-------------------------------------------------+
-; Flow Status                        ; Successful - Tue Jan 14 14:36:05 2020           ;
+; Flow Status                        ; Successful - Tue Jan 14 14:55:18 2020           ;
 ; Quartus Prime Version              ; 15.1.0 Build 185 10/21/2015 SJ Standard Edition ;
 ; Revision Name                      ; LogicalStep                                     ;
 ; Top-level Entity Name              ; LogicalStep                                     ;
@@ -256,7 +256,9 @@ agreement for further details.
 ; Assembler                 ; 00:00:09     ; 1.0                     ; 4901 MB             ; 00:00:02                           ;
 ; MIF/HEX Update            ; 00:00:06     ; 1.0                     ; 4937 MB             ; 00:00:01                           ;
 ; Assembler                 ; 00:00:08     ; 1.0                     ; 4901 MB             ; 00:00:02                           ;
-; Total                     ; 00:17:50     ; --                      ; --                  ; 00:05:30                           ;
+; MIF/HEX Update            ; 00:00:07     ; 1.0                     ; 4936 MB             ; 00:00:01                           ;
+; Assembler                 ; 00:00:10     ; 1.0                     ; 4901 MB             ; 00:00:02                           ;
+; Total                     ; 00:18:07     ; --                      ; --                  ; 00:05:33                           ;
 +---------------------------+--------------+-------------------------+---------------------+------------------------------------+
 
 
@@ -401,6 +403,8 @@ agreement for further details.
 ; Assembler                 ; ECE-RTOS13       ; Windows 8 ; 6.2        ; x86_64         ;
 ; MIF/HEX Update            ; ECE-RTOS13       ; Windows 8 ; 6.2        ; x86_64         ;
 ; Assembler                 ; ECE-RTOS13       ; Windows 8 ; 6.2        ; x86_64         ;
+; MIF/HEX Update            ; ECE-RTOS13       ; Windows 8 ; 6.2        ; x86_64         ;
+; Assembler                 ; ECE-RTOS13       ; Windows 8 ; 6.2        ; x86_64         ;
 +---------------------------+------------------+-----------+------------+----------------+
 
 
@@ -411,6 +415,8 @@ quartus_map --read_settings_files=on --write_settings_files=off LogicalStep -c L
 quartus_fit --read_settings_files=off --write_settings_files=off LogicalStep -c LogicalStep
 quartus_sta LogicalStep -c LogicalStep
 quartus_asm --read_settings_files=on --write_settings_files=off LogicalStep -c LogicalStep
+quartus_cdb --update_mif LogicalStep
+quartus_asm LogicalStep
 quartus_cdb --update_mif LogicalStep
 quartus_asm LogicalStep
 quartus_cdb --update_mif LogicalStep

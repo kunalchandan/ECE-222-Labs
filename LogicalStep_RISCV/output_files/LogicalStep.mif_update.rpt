@@ -1,5 +1,5 @@
 MIF/HEX Update report for LogicalStep
-Tue Jan 14 14:35:53 2020
+Tue Jan 14 14:55:05 2020
 Quartus Prime Version 15.1.0 Build 185 10/21/2015 SJ Standard Edition
 
 
@@ -36,7 +36,7 @@ agreement for further details.
 +---------------------------------------------------------------+
 ; MIF/HEX Update Summary                                        ;
 +-----------------------+---------------------------------------+
-; MIF/HEX Update Status ; Successful - Tue Jan 14 14:35:53 2020 ;
+; MIF/HEX Update Status ; Successful - Tue Jan 14 14:55:05 2020 ;
 ; Revision Name         ; LogicalStep                           ;
 ; Top-level Entity Name ; LogicalStep                           ;
 ; Family                ; MAX 10                                ;
@@ -73,14 +73,14 @@ Info: Running Quartus Prime MIF/HEX Update
     Info: devices manufactured by Altera and sold by Altera or its 
     Info: authorized distributors.  Please refer to the applicable 
     Info: agreement for further details.
-    Info: Processing started: Tue Jan 14 14:35:47 2020
+    Info: Processing started: Tue Jan 14 14:54:58 2020
 Info: Command: quartus_cdb --update_mif LogicalStep
-Critical Warning (127005): Memory depth (8192) in the design file differs from memory depth (20) in the Memory Initialization File "P:/ECE222/LogicalStep_RISCV/software/mem.hex" -- setting initial value for remaining addresses to 0
+Critical Warning (127005): Memory depth (8192) in the design file differs from memory depth (27) in the Memory Initialization File "P:/ECE222/LogicalStep_RISCV/software/mem.hex" -- setting initial value for remaining addresses to 0
 Info (39024): Processed the following Memory Initialization File(s)
     Info (39025): Processed Memory Initialization File P:/ECE222/LogicalStep_RISCV/software/mem.hex File: P:/ECE222/LogicalStep_RISCV/software/mem.hex Line: 0
 Info: Quartus Prime MIF/HEX Update was successful. 0 errors, 1 warning
-    Info: Peak virtual memory: 4937 megabytes
-    Info: Processing ended: Tue Jan 14 14:35:54 2020
+    Info: Peak virtual memory: 4936 megabytes
+    Info: Processing ended: Tue Jan 14 14:55:05 2020
     Info: Elapsed time: 00:00:07
     Info: Total CPU time (on all processors): 00:00:01
 
