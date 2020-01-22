@@ -9,7 +9,7 @@
 .align 4						# To make sure we start with 4 bytes aligned address (Not important for this one)
 InputLUT:						
 	# Use the following line only with the board
-	.ascii "DHZKC"				# Put the 5 Letters here instead of ABCDE
+	.ascii "BIRDS"				# Put the 5 Letters here instead of ABCDE
 	# Note: the memory is initialized to zero so as long as there are not 4*n characters there will be at least one zero (NULL) after the last character
 	
 	# Use the following 2 lines only on Venus simulator
@@ -60,7 +60,8 @@ main:
 	# Let x1 = return address (ra)
 	# Let x2 = stack pointer (sp)
 	# Let a0 = holds argument for Delay 
-	sw zero, 0(s1)				# Turn the LED off
+	#sw zero, 0(s1)				# Turn the LED off
+	jal LED_ON
 
     ResetLUT:
 		mv s5, s3				# assigns s5 to the address of the first byte  in the InputLUT
@@ -79,13 +80,13 @@ main:
 
 	RemoveZeros:
 		# Write your code here to remove trailling zeroes until you reach a one
-		lb t0, a0
-		lb t1, zero
+		lw t0, 0(a0)
+		add t1, zero, zero
 
 		REMOVE_LOOP:
 			srl t0, t0, 1
 			# Mask the shifted value with a zero
-			and t1, t0, 0x1
+			andi t1, t0, 0x1
 			beq t1, zero, REMOVE_LOOP
 		# store shifted value into a0 
 		add a0, t0, zero
@@ -95,32 +96,25 @@ main:
 		# Write your code here to peel off one bit at a time and turn the light on or off as necessary
 		add t0, a0, zero
 		add t1, zero, 0x1
-
+	
+		# AND mask and LSB
 		and t2, t1, t0
-		# jal t2, 1 , LED_ON
-		# jal t2, 0 , LED_OFF
-		la t3, LED_OFF
+
+		la t3, LED_ON
 		bne t2, zero, _ENDIF
 		# if the LSB = 1
-		la t3, LED_ON
-		
-
-
+		la t3, LED_OFF
 		_ENDIF:
-		# if (t2 == 1) {
-		# 	 jal ra, LED_ON
-		# } else {
-		#    jal ra, LED_OFF
-		# }
-		#
-		DISPLAY_LOOP:
 		
+		jalr ra, t3, 0
+
 		# Delay after the LED has been turned on or off
-		
-		
+		jal DELAY
+	
 		# Test if all bits are shifted
 		# If we're not done then loop back to Shift_and_display to shift the next bit
-		
+		srl t0, t0, 1
+		bne t0, zero, Shift_and_display
 		
 		# If we're done then branch back to get the next characte
 		j NextChar
@@ -132,34 +126,34 @@ main:
 # Subroutines
 LED_OFF:
 	## OFF Signal
-	li s5, 0x00
+	li s6, 0x00
 	## LOAD into LEDS
-	sw s5, 0(s1)
+	sw s6, 0(s1)
 	# Jump and link: link to nothing, return to caller 
 	jr ra
 	
 	
 LED_ON:
 	## ON Signal 
-	li s5, 0xFF
+	li s6, 0xFF
 	## LOAD into LEDS
-	sw s5, 0(s1)
+	sw s6, 0(s1)
 	# Jump and link: link to nothing, return to caller 
 	jr ra
 
 
 DELAY:
 	# t0 is the counter
-	li t0, x0
+	addi t0, zero, 0
 	# The number of times we need to loop 
-	li t1, zero
+	addi t1, zero, 0
 	# set the number of clock cycles for which we count
 	li t2, 0x5F5E10
 	# the number of times we need to loop to get the delay time (multiply)
-	li t3, zero
+	add t3, zero, zero
 
 	# if argument is zero, return
-	beq zero, a0, 0(ra) # if zero == a0 then 0(ra)
+	# beq zero, a0, 0(ra) # if zero == a0 then 
 
 	# Multiply by the number a0 * 500ms
 	DELAY_MUL_LOOP:
@@ -177,10 +171,13 @@ DELAY:
 CHAR2MORSE:
 	# Insert your code here to convert the ASCII code to an index and lookup the Morse pattern in the Lookup Table
 	# a0 = MorseLUT[4 * a0]
-	li t0, zero
-	li t0, a0
-	addi t0, t0, -0x41
-	slli t0, t0, 0x2
+	add t0, zero, zero
+	lw t0, 0(a0) # t0 contains 16 bits from ASCII or 2 bytes
+	addi t0, t0, -0x41 #
+	slli t0, t0, 2
 
-	lb a0, t0(MorseLUT)
+	# Get address in LUT
+	add t0, t0, s4
+	
+	lw a0, 0(t0)
 	jr ra
