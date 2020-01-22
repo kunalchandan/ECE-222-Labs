@@ -99,7 +99,14 @@ main:
 		and t2, t1, t0
 		# jal t2, 1 , LED_ON
 		# jal t2, 0 , LED_OFF
+		la t3, LED_OFF
+		bne t2, zero, _ENDIF
+		# if the LSB = 1
+		la t3, LED_ON
 		
+
+
+		_ENDIF:
 		# if (t2 == 1) {
 		# 	 jal ra, LED_ON
 		# } else {
