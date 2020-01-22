@@ -9,7 +9,7 @@
 .align 4						# To make sure we start with 4 bytes aligned address (Not important for this one)
 InputLUT:						
 	# Use the following line only with the board
-	.ascii "ABCDE"				# Put the 5 Letters here instead of ABCDE
+	.ascii "DHZKC"				# Put the 5 Letters here instead of ABCDE
 	# Note: the memory is initialized to zero so as long as there are not 4*n characters there will be at least one zero (NULL) after the last character
 	
 	# Use the following 2 lines only on Venus simulator
@@ -52,13 +52,60 @@ MorseLUT:
 .globl	main
 main:
 	# Put your initializations here
-	li s1, 0x7ff60000 			# assigns s1 with the LED base address (Could be replaced with lui s1, 0x7ff60)
+	li s1, 0x7ff60	 			# assigns s1 with the LED base address (Could be replaced with lui s1, 0x7ff60)
 	li s2, 0x01					# assigns s2 with the value 1 to be used to turn the LED on
 	la s3, InputLUT				# assigns s3 with the InputLUT base address
 	la s4, MorseLUT				# assigns s4 with the MorseLUT base address
 
+	# Let x1 = return address (ra)
+	# Let x2 = stack pointer (sp)
+	# Let a0 = holds argument for Delay 
 	sw zero, 0(s1)				# Turn the LED off
 		
+
+    LED_ON:
+    	## ON Signal 
+    	li s5, 0xFF
+        ## LOAD into LEDS
+    	sw s5, 0(s1)
+		# Jump and link: link to nothing, return to caller 
+		jalr x0, 0(ra)
+
+	LED_OFF:
+    	## OFF Signal
+    	li s5, 0x00
+        ## LOAD into LEDS
+    	sw s5, 0(s1)
+		# Jump and link: link to nothing, return to caller 
+		jalr x0, 0(ra)
+
+	DELAY:
+		# t0 is the counter
+		li t0, x0
+		# The number of times we need to loop 
+		li t1, zero
+		# set the number of clock cycles for which we count
+		li t2, 0x5F5E10
+		# the number of times we need to loop to get the delay time (multiply)
+		li t3, zero
+
+		# if argument is zero, return
+		beq zero, a0, 0(ra); # if zero == a0 then 0(ra)
+		
+
+		# Multiply by the number a0 * 500ms
+		DELAY_MUL_LOOP:
+			add t1, t1, t2 # t1 = t1 + t2
+			addi t3, t3, 0x1
+			bne a0, t3, DELAY_MUL_LOOP
+
+		DELAY_LOOP:
+			addi t0, t0, 1 # t0 = t0 + 1
+			bne t0, t1, DELAY_LOOP # if t0 == t1 then DELAY_LOOP
+		
+		jalr x0, 0(ra)
+
+
     ResetLUT:
 		mv s5, s3				# assigns s5 to the address of the first byte  in the InputLUT
 
