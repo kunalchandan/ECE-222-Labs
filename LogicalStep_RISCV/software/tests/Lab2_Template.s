@@ -9,7 +9,7 @@
 .align 4						# To make sure we start with 4 bytes aligned address (Not important for this one)
 InputLUT:						
 	# Use the following line only with the board
-	.ascii "BIRDS"				# Put the 5 Letters here instead of ABCDE
+	.ascii "SOSA"				# Put the 5 Letters here instead of ABCDE
 	# Note: the memory is initialized to zero so as long as there are not 4*n characters there will be at least one zero (NULL) after the last character
 	
 	# Use the following 2 lines only on Venus simulator
@@ -52,7 +52,7 @@ MorseLUT:
 .globl	main
 main:
 	# Put your initializations here
-	li s1, 0x7ff60	 			# assigns s1 with the LED base address (Could be replaced with lui s1, 0x7ff60)
+	lui s1, 0x7ff60	 			# assigns s1 with the LED base address (Could be replaced with lui s1, 0x7ff60)
 	li s2, 0x01					# assigns s2 with the value 1 to be used to turn the LED on
 	la s3, InputLUT				# assigns s3 with the InputLUT base address
 	la s4, MorseLUT				# assigns s4 with the MorseLUT base address
@@ -61,7 +61,7 @@ main:
 	# Let x2 = stack pointer (sp)
 	# Let a0 = holds argument for Delay 
 	#sw zero, 0(s1)				# Turn the LED off
-	jal LED_ON
+
 
     ResetLUT:
 		mv s5, s3				# assigns s5 to the address of the first byte  in the InputLUT
@@ -80,43 +80,50 @@ main:
 
 	RemoveZeros:
 		# Write your code here to remove trailling zeroes until you reach a one
-		lw t0, 0(a0)
+		addi t0, a0, 0
 		add t1, zero, zero
+		addi t3, zero, 0x1
 
 		REMOVE_LOOP:
-			srl t0, t0, 1
-			# Mask the shifted value with a zero
-			andi t1, t0, 0x1
+			srli t0, t0, 0x1
+			# Mask the shifted value with a 1 
+			and t1, t0, t3
+			# If it is zero, do it again
 			beq t1, zero, REMOVE_LOOP
-		# store shifted value into a0 
-		add a0, t0, zero
+		# store shifted value into s11 
+		# This is the morse code version of the char
+		add s11, t0, zero
 		
 	
 	Shift_and_display:
 		# Write your code here to peel off one bit at a time and turn the light on or off as necessary
-		add t0, a0, zero
-		add t1, zero, 0x1
+		add t0, s11, zero
+		# Make mask
+		addi t1, zero, 0x1
 	
 		# AND mask and LSB
 		and t2, t1, t0
 
-		la t3, LED_ON
+		la t3, LED_OFF
 		bne t2, zero, _ENDIF
 		# if the LSB = 1
-		la t3, LED_OFF
+		la t3, LED_ON
 		_ENDIF:
 		
-		jalr ra, t3, 0
-
+		jalr ra, 0(t3)
+		
+		# Set delay time to 500ms
+		addi a0, zero, 0x1
 		# Delay after the LED has been turned on or off
 		jal DELAY
 	
 		# Test if all bits are shifted
 		# If we're not done then loop back to Shift_and_display to shift the next bit
-		srl t0, t0, 1
+		srli s11, s11, 1
+		add t0, zero, s11
 		bne t0, zero, Shift_and_display
 		
-		# If we're done then branch back to get the next characte
+		# If we're done then branch back to get the next character
 		j NextChar
 # End of main function
 
@@ -126,43 +133,41 @@ main:
 # Subroutines
 LED_OFF:
 	## OFF Signal
-	li s6, 0x00
+	addi s2, zero, 0x00
 	## LOAD into LEDS
-	sw s6, 0(s1)
+	sw s2, 0(s1)
 	# Jump and link: link to nothing, return to caller 
 	jr ra
 	
 	
 LED_ON:
 	## ON Signal 
-	li s6, 0xFF
+	addi s2, zero, 0xFF
 	## LOAD into LEDS
-	sw s6, 0(s1)
+	sw s2, 0(s1)
 	# Jump and link: link to nothing, return to caller 
 	jr ra
 
 
 DELAY:
 	# t0 is the counter
-	addi t0, zero, 0
+	add t0, zero, zero
 	# The number of times we need to loop 
-	addi t1, zero, 0
+	add t1, zero, zero
 	# set the number of clock cycles for which we count
 	li t2, 0x5F5E10
 	# the number of times we need to loop to get the delay time (multiply)
 	add t3, zero, zero
 
-	# if argument is zero, return
-	# beq zero, a0, 0(ra) # if zero == a0 then 
-
-	# Multiply by the number a0 * 500ms
-	DELAY_MUL_LOOP:
-		add t1, t1, t2 # t1 = t1 + t2
-		addi t3, t3, 0x1
-		bne a0, t3, DELAY_MUL_LOOP
+	mul t1, a0, t2
+	# # Multiply by the number a0 * 500ms
+	# DELAY_MUL_LOOP:
+	# 	add t1, t1, t2 # t1 = t1 + t2
+	# 	addi t3, t3, 0x1
+	# 	bne a0, t3, DELAY_MUL_LOOP
 
 	DELAY_LOOP:
-		addi t0, t0, 1 # t0 = t0 + 1
+		addi t0, t0, 0x1 # t0 = t0 + 1
 		bne t0, t1, DELAY_LOOP # if t0 == t1 then DELAY_LOOP
 	
 	jr ra
@@ -171,10 +176,9 @@ DELAY:
 CHAR2MORSE:
 	# Insert your code here to convert the ASCII code to an index and lookup the Morse pattern in the Lookup Table
 	# a0 = MorseLUT[4 * a0]
-	add t0, zero, zero
-	lw t0, 0(a0) # t0 contains 16 bits from ASCII or 2 bytes
-	addi t0, t0, -0x41 #
-	slli t0, t0, 2
+	add t0, a0, zero # t0 contains 16 bits from ASCII or 2 bytes
+	addi t0, t0, -0x41 # convert to offset from 0
+	slli t0, t0, 2 # convert to byte addressable
 
 	# Get address in LUT
 	add t0, t0, s4
