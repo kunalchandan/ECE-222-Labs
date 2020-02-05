@@ -9,7 +9,7 @@
 .align 4						# To make sure we start with 4 bytes aligned address (Not important for this one)
 InputLUT:						
 	# Use the following line only with the board
-	.ascii "SOSA"				# Put the 5 Letters here instead of ABCDE
+	.ascii "BIRDS"				# Put the 5 Letters here instead of ABCDE
 	# Note: the memory is initialized to zero so as long as there are not 4*n characters there will be at least one zero (NULL) after the last character
 	
 	# Use the following 2 lines only on Venus simulator
@@ -71,6 +71,7 @@ main:
 		addi s5, s5, 1				# increases the index for the InputLUT (For future loads)
 		bne a0, zero, ProcessChar	# if char is not NULL, jumps to ProcessChar
 		# If we reached the end of the 5 letters, we start again
+		jal LED_OFF
 		li a0, 4 					# delay 4 extra spaces (7 total) between words to terminate
 		jal DELAY				
 		j ResetLUT					# start again
@@ -82,14 +83,14 @@ main:
 		# Write your code here to remove trailling zeroes until you reach a one
 		addi t0, a0, 0
 		add t1, zero, zero
-		addi t3, zero, 0x1
+		li t3, 1
 
 		REMOVE_LOOP:
 			srli t0, t0, 0x1
 			# Mask the shifted value with a 1 
 			and t1, t0, t3
 			# If it is zero, do it again
-			beq t1, zero, REMOVE_LOOP
+			bne t1, t3, REMOVE_LOOP
 		# store shifted value into s11 
 		# This is the morse code version of the char
 		add s11, t0, zero
@@ -99,15 +100,15 @@ main:
 		# Write your code here to peel off one bit at a time and turn the light on or off as necessary
 		add t0, s11, zero
 		# Make mask
-		addi t1, zero, 0x1
+		li t1, 1
 	
 		# AND mask and LSB
 		and t2, t1, t0
 
-		la t3, LED_OFF
+		la t3, LED_ON
 		bne t2, zero, _ENDIF
 		# if the LSB = 1
-		la t3, LED_ON
+		la t3, LED_OFF
 		_ENDIF:
 		
 		jalr ra, 0(t3)
@@ -122,7 +123,11 @@ main:
 		srli s11, s11, 1
 		add t0, zero, s11
 		bne t0, zero, Shift_and_display
-		
+
+		jal LED_OFF
+		addi a0, zero, 0x3
+		jal DELAY
+
 		# If we're done then branch back to get the next character
 		j NextChar
 # End of main function
