@@ -9,7 +9,7 @@
 .align 4						# To make sure we start with 4 bytes aligned address (Not important for this one)
 InputLUT:						
 	# Use the following line only with the board
-	.ascii "BIRDS"				# Put the 5 Letters here instead of ABCDE
+	.ascii "SOS"				# Put the 5 Letters here instead of ABCDE
 	# Note: the memory is initialized to zero so as long as there are not 4*n characters there will be at least one zero (NULL) after the last character
 	
 	# Use the following 2 lines only on Venus simulator
@@ -60,7 +60,6 @@ main:
 	# Let x1 = return address (ra)
 	# Let x2 = stack pointer (sp)
 	# Let a0 = holds argument for Delay 
-	#sw zero, 0(s1)				# Turn the LED off
 
 
     ResetLUT:
@@ -147,7 +146,7 @@ LED_OFF:
 	
 LED_ON:
 	## ON Signal 
-	addi s2, zero, 0xFF
+	addi s2, zero, 0x01
 	## LOAD into LEDS
 	sw s2, 0(s1)
 	# Jump and link: link to nothing, return to caller 
@@ -166,10 +165,6 @@ DELAY:
 
 	mul t1, a0, t2
 	# # Multiply by the number a0 * 500ms
-	# DELAY_MUL_LOOP:
-	# 	add t1, t1, t2 # t1 = t1 + t2
-	# 	addi t3, t3, 0x1
-	# 	bne a0, t3, DELAY_MUL_LOOP
 
 	DELAY_LOOP:
 		addi t0, t0, 0x1 # t0 = t0 + 1

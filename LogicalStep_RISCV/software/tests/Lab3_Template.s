@@ -17,13 +17,18 @@ main:
 	# Put your initializations here
 	li s1, 0x7ff60000 			# assigns s1 with the LED base address (Could be replaced with lui s1, 0x7ff60)
 	li s2, 0x7ff70000 			# assigns s2 with the push buttons base address (Could be replaced with lui s2, 0x7ff70)
+	# li a0, 0x186A0			#100k times
 
-	
-	
+	jal COUNTER
+	#jal DISPLAY_NUM
+
+	# jal DELAY
+	# jal LED_OFF 
 	
 	# Write your code here
 	
-	
+	# y = mx + b
+	# Map of random# to secondy = 0.1x + 20000
 	
 	
 	
@@ -35,19 +40,62 @@ main:
 
 
 
+# Subroutines
+COUNTER:
+	add t4, zero, zero		# Iterator
+	addi t5, zero, 0xFF
+	# addi s11, zero, 0xF
+
+	COUNTER_LOOP:
+		addi t4, t4, 0x1
+		# Store iterator, t4 into a0
+		add a0, zero, t4
+		# Display LEDs
+		jal DISPLAY_NUM
+		addi a0, zero, 1000 
+		jal DELAY
+		# Load the button values
+		# lw t6, 0(s2)
+		# if button is pressed exit
+		#beq s11, t6, COUNTER_EXIT
+		beq t4, t5, COUNTER
+		j COUNTER_LOOP  # jump to COUNTER_LOOP
+	
+	COUNTER_EXIT:
+		jr ra
 
 
-# Subroutines			
+
 DELAY:
-	# Insert your code here to make a delay of a0 * 0.1 ms
+	# t0 is the counter
+	add t0, zero, zero
+	# The number of times we need to loop 
+	add t1, zero, zero
+	# set the number of clock cycles for which we count (0.1ms)
+	li t2, 0x4E2
+	# the number of times we need to loop to get the delay time (multiply)
+	add t3, zero, zero
+
+	mul t1, a0, t2
+	# # Multiply by the number a0 * 100ms
+	DELAY_LOOP:
+		addi t0, t0, 0x1 # t0 = t0 + 1
+		bne t0, t1, DELAY_LOOP # if t0 == t1 then DELAY_LOOP
 	
 	jr ra
 
-
+LED_OFF:
+	## OFF Signal
+	addi s10, zero, 0x00
+	## LOAD into LEDS
+	sw s10, 0(s1)
+	# Jump and link: link to nothing, return to caller 
+	jr ra
+	
 
 DISPLAY_NUM:
 	# Insert your code here to display the 32 bits in a0 on the LEDs byte by byte (Least isgnificant byte first) with 2 seconds delay for each byte and 5 seconds for the last
-	
+	sw a0, 0(s1)
 	jr ra
 
 
