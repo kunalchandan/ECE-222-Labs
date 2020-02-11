@@ -44,7 +44,7 @@ main:
 COUNTER:
 	add t4, zero, zero		# Iterator
 	addi t5, zero, 0xFF
-	# addi s11, zero, 0xF
+	addi s11, zero, 0xF
 
 	COUNTER_LOOP:
 		addi t4, t4, 0x1
@@ -55,9 +55,9 @@ COUNTER:
 		addi a0, zero, 1000 
 		jal DELAY
 		# Load the button values
-		# lw t6, 0(s2)
+		lw t6, 0(s2)
 		# if button is pressed exit
-		#beq s11, t6, COUNTER_EXIT
+		bne s11, t6, COUNTER_EXIT
 		beq t4, t5, COUNTER
 		j COUNTER_LOOP  # jump to COUNTER_LOOP
 	
