@@ -18,21 +18,13 @@ main:
 	li s1, 0x7ff60000 			# assigns s1 with the LED base address (Could be replaced with lui s1, 0x7ff60)
 	li s2, 0x7ff70000 			# assigns s2 with the push buttons base address (Could be replaced with lui s2, 0x7ff70)
 	# li a0, 0x186A0			#100k times
-
-	jal COUNTER
-	#jal DISPLAY_NUM
-
-	# jal DELAY
-	# jal LED_OFF 
 	
 	# Write your code here
-	
+	jal REFLEX_METER
 	# y = mx + b
-	# Map of random# to secondy = 0.1x + 20000
-	
-	
-	
-	
+	# Map of random# to second y = 1.22x + 20000
+	jal LED_OFF
+	j QUIT
 # End of main function		
 		
 
@@ -41,31 +33,6 @@ main:
 
 
 # Subroutines
-COUNTER:
-	add t4, zero, zero		# Iterator
-	addi t5, zero, 0xFF
-	addi s11, zero, 0xF
-
-	COUNTER_LOOP:
-		addi t4, t4, 0x1
-		# Store iterator, t4 into a0
-		add a0, zero, t4
-		# Display LEDs
-		jal DISPLAY_NUM
-		addi a0, zero, 1000 
-		jal DELAY
-		# Load the button values
-		lw t6, 0(s2)
-		# if button is pressed exit
-		bne s11, t6, COUNTER_EXIT
-		beq t4, t5, COUNTER
-		j COUNTER_LOOP  # jump to COUNTER_LOOP
-	
-	COUNTER_EXIT:
-		jr ra
-
-
-
 DELAY:
 	# t0 is the counter
 	add t0, zero, zero
@@ -73,11 +40,9 @@ DELAY:
 	add t1, zero, zero
 	# set the number of clock cycles for which we count (0.1ms)
 	li t2, 0x4E2
-	# the number of times we need to loop to get the delay time (multiply)
-	add t3, zero, zero
-
+	# Multiply by the number a0 * 100us (or 0.1ms)
 	mul t1, a0, t2
-	# # Multiply by the number a0 * 100ms
+
 	DELAY_LOOP:
 		addi t0, t0, 0x1 # t0 = t0 + 1
 		bne t0, t1, DELAY_LOOP # if t0 == t1 then DELAY_LOOP
@@ -85,10 +50,8 @@ DELAY:
 	jr ra
 
 LED_OFF:
-	## OFF Signal
-	addi s10, zero, 0x00
 	## LOAD into LEDS
-	sw s10, 0(s1)
+	sw x0, 0(s1)
 	# Jump and link: link to nothing, return to caller 
 	jr ra
 	
@@ -98,7 +61,28 @@ DISPLAY_NUM:
 	sw a0, 0(s1)
 	jr ra
 
+REFLEX_METER:
+	# Save return address
+	addi sp, sp, -4
+	sw ra, 0(sp)
+	# Returns a random number in a0 (x)
+	jal RANDOM_NUM
 
+	# a0 is mutatated to store scaled value (y)
+	add a0, a0, zero
+	# Add 20000, requires more than 12 bit immediate (register)
+	li s3, 20000
+	add a0, a0, s3
+	
+	jal LED_OFF
+	# Delay for a pseudo-random amount of time (a0) before turning on
+	jal DELAY
+	# Start timer once delay is over: (display LED)
+	jal COUNTER
+
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	jr ra
 
 RANDOM_NUM:
 	# This is a provided pseudorandom number generator no need to modify it, just call it using JAL (the random number is saved at a0)
@@ -132,3 +116,39 @@ RANDOM_NUM:
 	addi sp, sp, 4
 	jr ra
 
+COUNTER:
+	add t4, zero, zero		# Iterator/Reaction time counter
+	addi t5, zero, 0xFF		# Max num
+	addi s11, zero, 0xF		# Check if button is pressed (1111 => nothing pressed)
+	addi s10, zero, 1 		# Display 1
+	# Display 1 LED -- comment out for Counter loop demo
+	sw s10, 0(s1)
+
+	COUNTER_LOOP:
+		addi t4, t4, 0x1
+		# Display LEDs -- comment out for Reflex meter
+		# sw t4, 0(s1)
+
+		# Store RA of caller before using in jal DELAY
+		addi sp, sp, -4
+		sw ra, 0(sp)
+		addi a0, zero, 1000 
+		jal ra, DELAY
+		lw ra, 0(sp)
+		addi sp, sp, 4
+
+		# Load the button values (Polling)
+		lw t6, 0(s2)
+		# if button is pressed exit
+		bne s11, t6, COUNTER_EXIT
+		# if we reach 0XFF, restart
+		beq t4, t5, COUNTER	
+		j COUNTER_LOOP 
+	
+COUNTER_EXIT:
+	# Return the reaction-time counter in a0
+	add a0, t4, zero
+	jr ra
+
+# WHY the fuck do i need this, why does it keep looping if i dont have this in main
+QUIT:
