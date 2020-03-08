@@ -134,8 +134,6 @@ REFLEX_METER:
 # REFLEX COUNTER -- COMMENT OUT FOR COUNTER DEMO
 COUNTER:
 	add t4, zero, zero		# Iterator/Reaction time counter
-	# addi s11, zero, 0xF		# Check if button is pressed (1111 => nothing pressed)
-	# addi s10, zero, 1 		# Display 1
 	# Display 1 LED 
 	sw s10, 0(s1)
 
@@ -164,8 +162,6 @@ COUNTER_EXIT:
 # COUNTER DEMO -- COMMENT OUT FOR REFLEX METER
 COUNTER_DEMO:
 	add t4, zero, zero		# Iterator/Reaction time counter
-	# addi s9, zero, 0xFF		# Max num
-	# addi s11, zero, 0xF		# Check if button is pressed (1111 => nothing pressed)
 
 	COUNTER_DEMO_LOOP:
 		addi t4, t4, 0x1
