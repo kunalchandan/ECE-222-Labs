@@ -19,13 +19,17 @@ main:
 	li s2, 0x7ff70000 			# assigns s2 with the push buttons base address (Could be replaced with lui s2, 0x7ff70)
 	li s4, 20000				# 20000 * 0.1ms = 2 seconds
 	li s7, 50000				# 50000 * 0.1ms = 10 seconds
+	addi s9, zero, 0xFF			# Max num for counter demo
+	addi s10, zero, 1 			# used for Display LED 1
+	addi s11, zero, 0xF			# Check if button is pressed (1111 => nothing pressed)
+
 	# li a0, 0x186A0			#100k times
 	
 	# Write your code here
 	jal LED_OFF
 	jal REFLEX_METER
 	# jal COUNTER_DEMO
-	j QUIT
+	j main
 # End of main function		
 		
 
@@ -84,6 +88,12 @@ DISPLAY_NUM:
 		add a0, s4, zero
 		jal DELAY
 		jal LED_OFF
+
+		# Load the button values (Polling)
+		lw t6, 0(s2)
+		# case: if button is pressed exit
+		bne s11, t6, DISPLAY_EXIT
+
 		bne t3, s6, DISPLAY_LOOP
 		# Delay 5 seconds
 		add a0, s7, zero
@@ -91,11 +101,12 @@ DISPLAY_NUM:
 		addi t3, zero, 0
 		add s5, a1, zero
 		j DISPLAY_LOOP
-	# j DISPLAY_LOOP
+
 	# Pop return address and go back to caller
-	lw ra, 0(sp)
-	addi sp, sp, 4
-	jr ra
+	DISPLAY_EXIT:
+		lw ra, 0(sp)
+		addi sp, sp, 4
+		jr ra
 
 REFLEX_METER:
 	# Save return address
@@ -123,9 +134,9 @@ REFLEX_METER:
 # REFLEX COUNTER -- COMMENT OUT FOR COUNTER DEMO
 COUNTER:
 	add t4, zero, zero		# Iterator/Reaction time counter
-	addi s11, zero, 0xF		# Check if button is pressed (1111 => nothing pressed)
-	addi s10, zero, 1 		# Display 1
-	# Display 1 LED -- comment out for Counter loop demo
+	# addi s11, zero, 0xF		# Check if button is pressed (1111 => nothing pressed)
+	# addi s10, zero, 1 		# Display 1
+	# Display 1 LED 
 	sw s10, 0(s1)
 
 	COUNTER_LOOP:
@@ -153,8 +164,8 @@ COUNTER_EXIT:
 # COUNTER DEMO -- COMMENT OUT FOR REFLEX METER
 COUNTER_DEMO:
 	add t4, zero, zero		# Iterator/Reaction time counter
-	addi s9, zero, 0xFF		# Max num
-	addi s11, zero, 0xF		# Check if button is pressed (1111 => nothing pressed)
+	# addi s9, zero, 0xFF		# Max num
+	# addi s11, zero, 0xF		# Check if button is pressed (1111 => nothing pressed)
 
 	COUNTER_DEMO_LOOP:
 		addi t4, t4, 0x1
@@ -214,5 +225,7 @@ RANDOM_NUM:
 	jr ra
 
 
-# WHY the fuck do i need this, why does it keep looping if i dont have this in main
-QUIT:
+##### POST LAB ######
+# 1. Max time: 2^n * 0.1ms where n is 8, 16, 24, and 32
+# 2. Most of the time, 16-bits holds enough for typical human reaction time
+#     We never saw any bits from 24-32 and had to wait a few minutes for any bits from 16-24.
