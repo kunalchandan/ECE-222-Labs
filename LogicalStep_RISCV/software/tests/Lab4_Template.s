@@ -18,16 +18,25 @@ main:
 	li s0, 0					# Initializes s0 to be 0
 	li s1, 0x7ff60000 			# assigns s1 with the LED base address (Could be replaced with lui s1, 0x7ff60)
 	li s2, 0x7ff70000 			# assigns s2 with the push buttons base address (Could be replaced with lui s2, 0x7ff70)
+	#li a0, 100					# 10 seconds
 
 	# Enabling Interrupts from core side
 	csrrsi zero, mstatus, 0x08 	#enable global interrupt
 	csrrsi zero, 0x7C0, 0x02 	#enable push button interrupt line from core side	
 	
 	# Enable a specific push button interrupt from the PIO side (Check Appendix B)
-	
+	# Address = offset (2*4) + s2 where address is Interruptmask
 	
 	# Write your functional code here
-	
+	FLASH:
+		li a0, 5
+		jal LED_ON
+		jal DELAY
+		li a0, 5
+		jal LED_OFF
+		jal DELAY
+	j FLASH
+		
 	
 # End of main function		
 
@@ -36,8 +45,85 @@ main:
 
 # Subroutines						
 DELAY:
-	# Insert your code here to make a delay of a0 * 0.1 s
+	# Save the return address to the stack
+	addi sp, sp, -0x4
+	sw ra, 0(sp)
+	# t0 is the counter for inner loop, t1 is the counter for outer loop (a0)
+	add t0, zero, zero
+	add t1, zero, zero
+	# The number of times we need to do outer loop
+	add t2, a0, zero
+	# The number of times we need to do inner loop (clock cycles for which we count (0.1s))
+	li s3, 0x1312D0
 
+
+	# Multiply by the number a0 * 0.1s by running 0.1s a0 times
+	DELAY_OUTER_LOOP:
+		# t0 is the counter
+		add t0, zero, zero
+		# This delays for 0.1 seconds
+		DELAY_LOOP:
+			addi t0, t0, 0x1 			# increment DELAY_LOOP iterator
+			bne t0, s3, DELAY_LOOP 		# if t0 != s3 then DELAY_LOOP
+		addi t1, t1, 0x1				# increment DELAY_OUTER_LOOP iterator
+
+		# TODO generate random number here
+		# Since t0-3 is being used in GENERATE_TIME/RANDOM_NUM, we store the value of the counters before calling.
+		addi sp, sp, -8
+		sw t1, 0(sp)
+		sw t2, 4(sp)
+		jal GENERATE_TIME				# Returns a0 = [50s, 250s]
+		lw t1, 0(sp)
+		lw t2, 4(sp)
+		addi sp, sp, 8
+
+		# Store the random time into s0
+		add s0, a0, zero
+
+		bne t1, t2, DELAY_OUTER_LOOP; 	# if t1 != t2 then DELAY_OUTER_LOOP
+	
+	lw ra, 0(sp)
+	addi sp, sp, 0x4
+	jr ra
+
+
+
+LED_OFF:
+	## LOAD into LEDS
+	sw x0, 0(s1)
+	# Jump and link: link to nothing, return to caller 
+	jr ra
+
+LED_ON:
+	addi t0, zero, 0xFF
+	## LOAD into LEDS
+	sw t0, 0(s1)
+	# Jump and link: link to nothing, return to caller 
+	jr ra
+
+# Generates a time T = 0.003a0 + 50 where a0 is a number from 1-2^16 - 1 given by RANDOM_NUM
+GENERATE_TIME:
+	# Save the return address to the stack
+	addi sp, sp, -4
+	sw ra, 0(sp)
+
+	# Sets a0 (x in y=mx+b) to a number [1, 2^16-1
+	jal RANDOM_NUM
+
+	# 0.0030518 ~= (1/2^8 - 1/2^10 + 1/2^13)
+	srli t0, a0, 8
+	srli t1, a0, 10
+	srli t2, a0, 13
+
+	sub a0, t0, t1 
+	add a0, a0, t3
+
+	# At this point we have 0.003X, we add the intercept and return in a0
+	addi a0, a0, 50
+
+	# Pop off the stack and return
+	lw ra, 0(sp)
+	addi sp, sp, 4
 	jr ra
 
 
