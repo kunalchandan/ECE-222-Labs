@@ -222,6 +222,8 @@ RANDOM_NUM:
 
 
 ##### POST LAB ######
-# 1. Max time: 2^n * 0.1ms where n is 8, 16, 24, and 32
-# 2. Most of the time, 16-bits holds enough for typical human reaction time
-#     We never saw any bits from 24-32 and had to wait a few minutes for any bits from 16-24.
+# 1. Max time: 2^n -1 * 0.1ms where n is 8, 16, 24, and 32
+# 2. Most of the time, 16-bits holds enough for typical human reaction time (100-300ms)
+#     With 16 bits we can store/display upto ~6.5 seconds
+#     We never saw any bits from 24-32 as this would take upto ~27 minutes display the 24th bit.
+#     To see all the bits it would take ~ 5 days
